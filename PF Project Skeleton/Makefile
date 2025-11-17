@@ -3,38 +3,38 @@
 # ============================================================================
 
 CXX = g++
-CXXFLAGS = -std=c++11 -Wall -Wextra -g
+CXXFLAGS = -std=c++11 -Wall -Wextra -g -mconsole
+SFML_INCLUDE = -I"C:/Users/moham/OneDrive/Desktop/SFML-2.5.1/include"
+SFML_LIB = -L"C:/Users/moham/OneDrive/Desktop/SFML-2.5.1/lib"
 SFML_FLAGS = -lsfml-graphics -lsfml-window -lsfml-system
 
-# Source files
-CORE_SRCS = core/simulation_state.cpp core/grid.cpp core/trains.cpp \
-            core/switches.cpp core/simulation.cpp core/io.cpp
-SFML_SRCS = sfml/app.cpp sfml/main.cpp
+# Automatically find all .cpp files in core/ and sfml/ directories
+CORE_SRCS = $(wildcard core/*.cpp)
+SFML_SRCS = $(wildcard sfml/*.cpp)
+ALL_SRCS = $(CORE_SRCS) $(SFML_SRCS)
 
-# Object files
-CORE_OBJS = $(CORE_SRCS:.cpp=.o)
-SFML_OBJS = $(SFML_SRCS:.cpp=.o)
-ALL_OBJS = $(CORE_OBJS) $(SFML_OBJS)
+# Generate object file names from source files
+ALL_OBJS = $(ALL_SRCS:.cpp=.o)
 
 # Output executable
-TARGET = switchback_rails
+TARGET = switchback_rails.exe
 
 # Default target
 all: $(TARGET)
 
 # Link executable
 $(TARGET): $(ALL_OBJS)
-	$(CXX) $(CXXFLAGS) -o $@ $^ $(SFML_FLAGS)
+	$(CXX) $(CXXFLAGS) -o $@ $^ $(SFML_LIB) $(SFML_FLAGS)
 	@echo "Build complete! Run with: ./$(TARGET)"
 
-# Compile source files
+# Compile source files (pattern rule for all .cpp files)
 %.o: %.cpp
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) $(SFML_INCLUDE) -c $< -o $@
 
 # Clean build artifacts
 clean:
-	rm -f $(ALL_OBJS) $(TARGET)
-	rm -f out/*.csv out/*.txt
+	-del /Q core\*.o sfml\*.o $(TARGET) 2>nul
+	-del /Q out\*.csv out\*.txt 2>nul
 	@echo "Clean complete!"
 
 # Run the complex network level (default)
@@ -51,15 +51,9 @@ help:
 	@echo "  make clean    - Remove build artifacts"
 	@echo "  make help     - Show this help message"
 	@echo ""
-	@echo "🚂 Complex Network Level Features:"
-	@echo "  - 10 trains with interconnected paths"
-	@echo "  - 20 switches (A-T) for dynamic routing"
-	@echo "  - 16 crossing points for track exchanges"
-	@echo "  - Multiple route options per train"
-	@echo "  - Signal lights (GREEN/YELLOW/RED)"
-	@echo "  - NORMAL weather for consistent behavior"
-	@echo ""
-	@echo "Read README.md for complete documentation!"
+	@echo "Found source files:"
+	@echo "  Core: $(CORE_SRCS)"
+	@echo "  SFML: $(SFML_SRCS)"
 
 .PHONY: all clean run help
 
